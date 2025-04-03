@@ -3,13 +3,23 @@
     "builds": [
         {
             "src": "app.py",
-            "use": "@vercel/python"
+            "use": "@vercel/python",
+            "config": {
+                "maxLambdaSize": "15mb",
+                "runtime": "python3.11"
+            }
         }
     ],
     "routes": [
         {
             "src": "/(.*)",
             "dest": "app.py"
+        }
+    ],
+    "crons": [
+        {
+            "path": "/optimize",
+            "schedule": "0 10 * * *"
         }
     ]
 } 
