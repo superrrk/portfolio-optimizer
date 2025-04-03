@@ -50,19 +50,4 @@ python app.py
 
 ## Deployment
 
-This application is deployed on Netlify. To deploy your own instance:
-
-1. Fork this repository
-2. Sign up for Netlify
-3. Connect your GitHub repository to Netlify
-4. Configure the build settings:
-   - Build command: `pip install -r requirements.txt`
-   - Publish directory: `templates`
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This application is deployed on Netlify.
