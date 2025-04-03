@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Optimizer</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            background-color: #f5f7fa;
+            color: #2d3748;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #1a365d;
+            font-size: 2.5rem;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+
+        .selector-container {
+            margin-bottom: 2rem;
+        }
+
+        .sector-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .sector-button {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .sector-button:hover {
+            background: #f7fafc;
+        }
+
+        .sector-button.active {
+            background: #4299e1;
+            color: white;
+            border-color: #4299e1;
+        }
+
+        #portfolio-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .select2-container {
+            width: 100% !important;
+        }
+
+        .select2-container--default .select2-selection--multiple {
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            min-height: 45px;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border-color: #4299e1;
+            outline: none;
+        }
+
+        button[type="submit"] {
+            background-color: #4299e1;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            align-self: center;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #3182ce;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+            color: #4a5568;
+        }
+
+        .error {
+            color: #e53e3e;
+            text-align: center;
+            margin: 1rem 0;
+            padding: 0.5rem;
+            border-radius: 4px;
+            background-color: #fff5f5;
+        }
+
+        .chart-container {
+            position: relative;
+            margin: 2rem auto;
+            max-width: 1000px;
+            height: 500px;
+        }
+
+        #frontierChart {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .stock-info {
+            font-size: 0.875rem;
+            color: #718096;
+        }
+
+        .info-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: #4299e1;
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.2s;
+            z-index: 100;
+        }
+
+        .info-button:hover {
+            background-color: #3182ce;
+            transform: scale(1.05);
+        }
+
+        .info-panel {
+            position: fixed;
+            right: -400px;
+            top: 0;
+            width: 400px;
+            height: 100vh;
+            background-color: white;
+            box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            overflow-y: auto;
+            transition: right 0.3s ease;
+            z-index: 99;
+        }
+
+        .info-panel.active {
+            right: 0;
+        }
+
+        .info-panel-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #4a5568;
+        }
+
+        .info-section {
+            margin-bottom: 2rem;
+        }
+
+        .info-section h2 {
+            color: #2d3748;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .info-section p {
+            color: #4a5568;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .calculation-details {
+            background-color: #f7fafc;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .math-formula {
+            font-family: 'Times New Roman', serif;
+            background-color: #edf2f7;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+            overflow-x: auto;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 98;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Portfolio Optimizer</h1>
+        <div class="form-container">
+            <div class="selector-container">
+                <div class="sector-filters">
+                    <button type="button" class="sector-button active" data-sector="all">All Sectors</button>
+                    <button type="button" class="sector-button" data-sector="tech">Technology</button>
+                    <button type="button" class="sector-button" data-sector="finance">Finance</button>
+                    <button type="button" class="sector-button" data-sector="healthcare">Healthcare</button>
+                    <button type="button" class="sector-button" data-sector="consumer">Consumer</button>
+                    <button type="button" class="sector-button" data-sector="energy">Energy</button>
+                </div>
+                <form id="portfolio-form">
+                    <select id="stock-selector" multiple="multiple" style="width: 100%">
+                    </select>
+                    <button type="submit">Optimize Portfolio</button>
+                </form>
+            </div>
+            <div id="loading" class="loading">Optimizing portfolio...</div>
+            <div id="error" class="error"></div>
+        </div>
+        <div class="chart-container">
+            <canvas id="frontierChart"></canvas>
+        </div>
+    </div>
+
+    <button class="info-button" id="infoButton" aria-label="Show information">
+        <span>ℹ️</span>
+    </button>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div class="info-panel" id="infoPanel">
+        <button class="info-panel-close" id="infoPanelClose" aria-label="Close information panel">×</button>
+        
+        <div class="info-section">
+            <h2>Understanding Portfolio Optimization</h2>
+            <p>This tool uses Modern Portfolio Theory (MPT), developed by Harry Markowitz, to find the optimal balance between risk and return in your investment portfolio.</p>
+        </div>
+
+        <div class="info-section">
+            <h2>How to Read the Graph</h2>
+            <p>The Efficient Frontier graph shows:</p>
+            <ul>
+                <li>X-axis: Risk (measured by standard deviation)</li>
+                <li>Y-axis: Expected Return</li>
+                <li>Each point represents a possible portfolio allocation</li>
+                <li>The curve shows the best possible return for each level of risk</li>
+            </ul>
+        </div>
+
+        <div class="info-section">
+            <h2>Behind the Calculations</h2>
+            <div class="calculation-details">
+                <p>The optimization process involves:</p>
+                <ol>
+                    <li>Calculating expected returns for each stock</li>
+                    <li>Computing the covariance matrix to measure how stocks move together</li>
+                    <li>Finding optimal weights that maximize the Sharpe ratio</li>
+                </ol>
+                <div class="math-formula">
+                    Portfolio Return = Σ (wi × ri)<br>
+                    Portfolio Risk = √(wT × Σ × w)<br>
+                    where:<br>
+                    wi = weight of asset i<br>
+                    ri = expected return of asset i<br>
+                    Σ = covariance matrix
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2>Optimization Goals</h2>
+            <p>For each point on the efficient frontier, the algorithm:</p>
+            <ul>
+                <li>Maximizes expected return for a given level of risk</li>
+                <li>Minimizes risk for a given level of expected return</li>
+                <li>Considers the correlations between all selected assets</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+    // Stock data with sectors
+    const stocks = {
+        tech: [
+            { symbol: 'AAPL', name: 'Apple Inc.' },
+            { symbol: 'MSFT', name: 'Microsoft Corporation' },
+            { symbol: 'GOOGL', name: 'Alphabet Inc.' },
+            { symbol: 'AMZN', name: 'Amazon.com Inc.' },
+            { symbol: 'NVDA', name: 'NVIDIA Corporation' },
+            { symbol: 'META', name: 'Meta Platforms Inc.' }
+        ],
+        finance: [
+            { symbol: 'JPM', name: 'JPMorgan Chase & Co.' },
+            { symbol: 'BAC', name: 'Bank of America Corp.' },
+            { symbol: 'WFC', name: 'Wells Fargo & Company' },
+            { symbol: 'V', name: 'Visa Inc.' },
+            { symbol: 'MA', name: 'Mastercard Incorporated' }
+        ],
+        healthcare: [
+            { symbol: 'JNJ', name: 'Johnson & Johnson' },
+            { symbol: 'UNH', name: 'UnitedHealth Group Inc.' },
+            { symbol: 'PFE', name: 'Pfizer Inc.' },
+            { symbol: 'ABBV', name: 'AbbVie Inc.' },
+            { symbol: 'MRK', name: 'Merck & Co.' }
+        ],
+        consumer: [
+            { symbol: 'PG', name: 'Procter & Gamble Co.' },
+            { symbol: 'KO', name: 'The Coca-Cola Company' },
+            { symbol: 'PEP', name: 'PepsiCo Inc.' },
+            { symbol: 'WMT', name: 'Walmart Inc.' },
+            { symbol: 'COST', name: 'Costco Wholesale Corporation' }
+        ],
+        energy: [
+            { symbol: 'XOM', name: 'Exxon Mobil Corporation' },
+            { symbol: 'CVX', name: 'Chevron Corporation' },
+            { symbol: 'COP', name: 'ConocoPhillips' },
+            { symbol: 'SLB', name: 'Schlumberger N.V.' },
+            { symbol: 'EOG', name: 'EOG Resources Inc.' }
+        ]
+    };
+
+    let currentChart = null;
+
+    // Initialize Select2
+    $(document).ready(function() {
+        const $stockSelector = $('#stock-selector');
+        
+        // Initialize Select2 with custom template
+        $stockSelector.select2({
+            placeholder: 'Search and select stocks...',
+            allowClear: true,
+            templateResult: formatStock,
+            templateSelection: formatStockSelection
+        });
+
+        // Load all stocks initially
+        loadStocks('all');
+
+        // Handle sector button clicks
+        $('.sector-button').click(function() {
+            $('.sector-button').removeClass('active');
+            $(this).addClass('active');
+            loadStocks($(this).data('sector'), true);
+        });
+
+        // Info panel controls
+        const infoButton = document.getElementById('infoButton');
+        const infoPanel = document.getElementById('infoPanel');
+        const infoPanelClose = document.getElementById('infoPanelClose');
+        const overlay = document.getElementById('overlay');
+
+        infoButton.addEventListener('click', () => {
+            infoPanel.classList.add('active');
+            overlay.classList.add('active');
+        });
+
+        function closeInfoPanel() {
+            infoPanel.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        infoPanelClose.addEventListener('click', closeInfoPanel);
+        overlay.addEventListener('click', closeInfoPanel);
+    });
+
+    // Format stock display in dropdown
+    function formatStock(stock) {
+        if (!stock.id) return stock.text;
+        return $(`
+            <div class="stock-info">
+                <strong>${stock.id}</strong> - ${stock.text}
+            </div>
+        `);
+    }
+
+    // Format selected stock display
+    function formatStockSelection(stock) {
+        if (!stock.id) return stock.text;
+        return stock.id;
+    }
+
+    // Modified loadStocks function to preserve selections
+    function loadStocks(sector, preserveSelection = false) {
+        const $stockSelector = $('#stock-selector');
+        const selectedStocks = preserveSelection ? $stockSelector.val() || [] : [];
+        
+        // Store all current options
+        const currentOptions = {};
+        $stockSelector.find('option').each(function() {
+            currentOptions[$(this).val()] = $(this).text();
+        });
+
+        // Clear without triggering events
+        $stockSelector.empty();
+
+        // Add filtered stocks
+        const stocksToAdd = sector === 'all' 
+            ? Object.values(stocks).flat() 
+            : stocks[sector];
+
+        // Add stocks from current sector
+        stocksToAdd.forEach(stock => {
+            $stockSelector.append(new Option(stock.name, stock.symbol, false, selectedStocks.includes(stock.symbol)));
+        });
+
+        // Add selected stocks from other sectors if they're not already added
+        if (preserveSelection) {
+            selectedStocks.forEach(symbol => {
+                if (!$stockSelector.find(`option[value="${symbol}"]`).length) {
+                    // Find the stock details from the full dataset
+                    const stockDetails = Object.values(stocks)
+                        .flat()
+                        .find(s => s.symbol === symbol);
+                    
+                    if (stockDetails) {
+                        $stockSelector.append(new Option(stockDetails.name, symbol, false, true));
+                    }
+                }
+            });
+        }
+
+        // Trigger change to update Select2
+        $stockSelector.trigger('change');
+    }
+
+    document.getElementById('portfolio-form').onsubmit = async function(e) {
+        e.preventDefault();
+        const selectedStocks = $('#stock-selector').val();
+        
+        if (!selectedStocks || selectedStocks.length < 2) {
+            document.getElementById('error').textContent = 'Please select at least 2 stocks for optimization';
+            return;
+        }
+
+        const loadingEl = document.getElementById('loading');
+        const errorEl = document.getElementById('error');
+        
+        loadingEl.style.display = 'block';
+        errorEl.textContent = '';
+
+        try {
+            // Destroy previous chart if it exists
+            if (currentChart) {
+                currentChart.destroy();
+                currentChart = null;
+            }
+
+            const res = await fetch('/optimize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tickers: selectedStocks })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok || data.error) {
+                throw new Error(data.error || "An error occurred while optimizing. Please check your selection.");
+            }
+
+            const ctx = document.getElementById('frontierChart').getContext('2d');
+            currentChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Efficient Frontier',
+                        data: data.risks.map((r, i) => ({ x: r, y: data.returns[i] })),
+                        borderColor: '#4299e1',
+                        backgroundColor: 'rgba(66, 153, 225, 0.1)',
+                        showLine: true,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    family: 'Inter',
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Risk: ${context.parsed.x.toFixed(4)}, Return: ${context.parsed.y.toFixed(4)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Risk (Standard Deviation)',
+                                font: {
+                                    family: 'Inter',
+                                    size: 14,
+                                    weight: '500'
+                                }
+                            },
+                            grid: {
+                                color: '#e2e8f0'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Expected Return',
+                                font: {
+                                    family: 'Inter',
+                                    size: 14,
+                                    weight: '500'
+                                }
+                            },
+                            grid: {
+                                color: '#e2e8f0'
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            errorEl.textContent = error.message;
+        } finally {
+            loadingEl.style.display = 'none';
+        }
+    };
+    </script>
+</body>
+</html>
