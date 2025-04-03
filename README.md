@@ -12,11 +12,15 @@ An interactive web application that helps users optimize their investment portfo
 
 ## Technologies Used
 
-- Python (Flask)
-- JavaScript
-- Chart.js for visualization
-- Select2 for enhanced dropdowns
-- Modern Portfolio Theory for optimization
+**Frontend:** HTML, CSS, JavaScript
+<br>
+**Backend:** Python (Flask)
+<br>
+Chart.js for visualization,
+Select2 for enhanced dropdowns,
+Modern Portfolio Theory for optimization
+
+<img width="1501" alt="Image" src="https://github.com/user-attachments/assets/b1b38f39-7b4b-4e96-b562-e4289beac53e" />
 
 ## Local Development Setup
 
