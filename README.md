@@ -12,7 +12,7 @@ Chart.js for visualization,
 Select2 for enhanced dropdowns,
 Modern Portfolio Theory for optimization
 
-## 📸 Screenshots/Live Demo 
+## 📸 Live Demo 
 <img width="1501" alt="Image" src="https://github.com/user-attachments/assets/b1b38f39-7b4b-4e96-b562-e4289beac53e" />
 
 ## 🎯 Features
