@@ -1,4 +1,4 @@
-# 📈 portfolio optimizer
+# 📈 Portfolio Optimizer
 
 An interactive web application that helps users optimize their investment portfolios using Modern Portfolio Theory (MPT). The application visualizes the efficient frontier and allows users to select stocks from different sectors to create an optimized portfolio.
 
